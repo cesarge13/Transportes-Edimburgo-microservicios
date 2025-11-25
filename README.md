@@ -1,56 +1,139 @@
-# Transportes Edimburgo - Sitio Web
+# Website - Transportes Edimburgo
 
-## Archivos Creados
+Aplicación web para Transportes Edimburgo con calculadora de cotización integrada con Google Maps.
 
-- `index.html` - Página principal
-- `styles.css` - Estilos CSS
-- `script.js` - JavaScript para interactividad
-- `images/` - Directorio para imágenes
+## 🚀 Características
 
-## Imágenes Necesarias
+- ✅ Calculadora de cotización interactiva con Google Maps
+- ✅ Cálculo automático de rutas y distancias
+- ✅ Autocompletado de direcciones (incluye aeropuertos y establecimientos)
+- ✅ Selección de ubicaciones en mapa
+- ✅ Validación de regiones (Chile por defecto, extensible)
+- ✅ Sistema de logging completo para depuración
+- ✅ Cálculo de precios por kilómetro según tipo de servicio
+- ✅ Diseño responsive y moderno
 
-Necesitas subir las siguientes imágenes al directorio `images/`:
-
-1. `airport-van.jpg` - Imagen del minivan en el aeropuerto (usada en hero y sección "Quienes Somos")
-2. `hotel-van.jpg` - Imagen del minivan en el hotel (usada en calculadora y reserva)
-
-## Cómo Subir las Imágenes
-
-Puedes usar SCP para subir las imágenes:
+## 📦 Instalación
 
 ```bash
-scp airport-van.jpg cesar@72.60.136.211:~/transportes-edimburgo/images/
-scp hotel-van.jpg cesar@72.60.136.211:~/transportes-edimburgo/images/
+# Desde la raíz del monorepo
+yarn install
+
+# O solo para el website
+cd website
+yarn install
 ```
 
-O conectarte por SSH y usar un cliente FTP/SFTP.
+## ⚙️ Configuración
 
-## Configuración del Servidor Web
+Crea un archivo `.env` en `website/`:
 
-Si necesitas servir estos archivos con un servidor web (Apache, Nginx, etc.), asegúrate de:
+```env
+VITE_GOOGLE_MAPS_API_KEY=tu_api_key_aqui
+```
 
-1. Configurar el DocumentRoot o root del servidor apuntando a `~/transportes-edimburgo/`
-2. O crear un enlace simbólico desde el directorio web público
+### APIs de Google Requeridas
 
-### Ejemplo con Apache:
+1. **Maps JavaScript API** - Para mostrar mapas
+2. **Directions API** - Para calcular rutas
+3. **Places API** - Para autocompletado y búsqueda
+4. **Geocoding API** - Para convertir direcciones a coordenadas
+
+## 🛠️ Desarrollo
+
 ```bash
-sudo ln -s ~/transportes-edimburgo /var/www/html/transportes-edimburgo
+# Iniciar servidor de desarrollo
+yarn dev:website
+
+# Construir para producción
+yarn build:website
+
+# Preview de producción
+yarn preview
 ```
 
-### Ejemplo con Nginx:
-Editar la configuración para que el root apunte a `~/transportes-edimburgo`
+## 🏗️ Arquitectura
 
-## Características del Sitio
+### Integración con Microservicios
 
-- ✅ Diseño responsive (adaptable a móviles)
-- ✅ Bilingüe (Español/Inglés)
-- ✅ Calculadora de tarifas por km
-- ✅ Formulario de reserva
-- ✅ Secciones: Quienes Somos, Servicios, Calculadora, Reserva, Contacto
-- ✅ Navegación suave entre secciones
-- ✅ Diseño moderno y profesional
+El website usa el microservicio `@operations/google-maps-service` a través de wrappers en `src/lib/`:
 
-## Contacto en el Sitio
+- **`googleMaps.ts`**: Wrapper principal que usa el microservicio y agrega funcionalidades específicas del website
+- **`mapsLogger.ts`**: Sistema de logging extendido
+- **`notifications.ts`**: Sistema de notificaciones sutiles (sin alerts molestos)
+- **`regionValidation.ts`**: Validación de regiones permitidas
 
-- Teléfono: +569 8944 8371
-- Email: transportesedimburgo@icloud.com
+### Componentes Principales
+
+- **`IntegratedQuoteMap`**: Componente principal que integra el formulario con el mapa
+- **`GooglePlacesAutocomplete`**: Componente de autocompletado de direcciones
+- **`AdminRegionPanel`**: Panel de administración de regiones permitidas
+
+## 🔧 Funcionalidades
+
+### Calculadora de Cotización
+
+- Selección de origen y destino (texto, mapa, o GPS)
+- Cálculo automático de distancia y tiempo
+- Cálculo de precio según:
+  - Tipo de servicio (Aeropuerto, Hotel, Turístico, Evento, Tour)
+  - Distancia en kilómetros
+  - Número de pasajeros
+  - Precio mínimo garantizado
+
+### Validación de Regiones
+
+- Validación automática de que las rutas estén en regiones permitidas
+- Panel de administración para habilitar/deshabilitar regiones
+- Configuración por defecto: Solo Chile habilitado
+
+### Sistema de Logging
+
+El website incluye logging completo para depuración:
+
+```javascript
+// En la consola del navegador (desarrollo)
+window.mapsLogger.getLogs()        // Ver todos los logs
+window.mapsLogger.getErrors()      // Ver solo errores
+window.mapsLogger.exportLogs()     // Exportar como JSON
+window.mapsLogger.downloadLogs()   // Descargar archivo
+```
+
+## 📝 Uso del Microservicio
+
+El website usa el microservicio de Google Maps de la siguiente manera:
+
+```typescript
+// En src/lib/googleMaps.ts
+import { calculateRoute as calculateRouteService } from '@operations/google-maps-service'
+
+// Wrapper que agrega funcionalidades específicas del website
+export const calculateRoute = async (origin, destination) => {
+  // Lógica específica del website
+  // + uso del microservicio
+  return calculateRouteService(origin, destination)
+}
+```
+
+## 🐛 Depuración
+
+### Logger de Maps
+
+```javascript
+// Ver logs en consola
+window.mapsLogger.getLogs()
+
+// Filtrar por tipo
+window.mapsLogger.getLogsByType('error')
+
+// Exportar logs
+window.mapsLogger.exportLogs()
+```
+
+### Notificaciones
+
+El sistema de notificaciones registra todos los eventos sin mostrar alerts molestos. Los errores se registran en el logger.
+
+## 📄 Licencia
+
+MIT
